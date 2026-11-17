@@ -1,65 +1,54 @@
 const questions = [
-
     {
-        question: "1. Qual é o principal objetivo de um site falso do governo?",
-
+        question: "1. O que é um site falso?",
         answers: [
-            "A) Oferecer serviços públicos.",
-            "B) Enganar pessoas e obter informações pessoais.",
-            "C) Divulgar notícias oficiais."
+            "Uma página criada para enganar usuários.",
+            "Um site oficial do governo.",
+            "Uma página de notícias."
         ],
-
-        correct: 1
+        correct: 0,
+        explanation: "Correto! Sites falsos tentam imitar páginas legítimas para enganar pessoas."
     },
-
     {
-        question: "2. O que você deve fazer ao receber um link prometendo dinheiro de um benefício?",
-
+        question: "2. O que fazer ao receber um link suspeito?",
         answers: [
-            "A) Clicar imediatamente.",
-            "B) Informar seus dados pessoais.",
-            "C) Verificar a informação nos canais oficiais."
+            "Abrir imediatamente.",
+            "Compartilhar com amigos.",
+            "Não clicar e verificar a origem."
         ],
-
-        correct: 2
+        correct: 2,
+        explanation: "Correto! É importante verificar a origem antes de acessar qualquer link."
     },
-
     {
-        question: "3. O serviço Valores a Receber do Banco Central cobra taxas pela consulta?",
-
+        question: "3. O serviço Valores a Receber cobra alguma taxa?",
         answers: [
-            "A) Não. A consulta oficial é gratuita.",
-            "B) Sim, sempre cobra uma taxa.",
-            "C) Somente por mensagem."
+            "Sim, sempre cobra.",
+            "Não, o serviço oficial é gratuito.",
+            "Depende do valor recebido."
         ],
-
-        correct: 0
+        correct: 1,
+        explanation: "Correto! O serviço oficial do Banco Central é gratuito."
     },
-
     {
-        question: "4. Qual atitude ajuda a proteger suas contas na internet?",
-
+        question: "4. Qual é um sinal de possível golpe?",
         answers: [
-            "A) Compartilhar suas senhas.",
-            "B) Utilizar autenticação em duas etapas.",
-            "C) Acessar qualquer página."
+            "Endereço oficial confirmado.",
+            "Informação em um canal oficial.",
+            "Promessa de dinheiro mediante pagamento antecipado."
         ],
-
-        correct: 1
+        correct: 2,
+        explanation: "Correto! Cobranças antecipadas para liberar supostos benefícios são um sinal de alerta."
     },
-
     {
-        question: "5. O que fazer se você informar seus dados em uma página suspeita?",
-
+        question: "5. Como se proteger de sites falsos?",
         answers: [
-            "A) Ignorar o ocorrido.",
-            "B) Compartilhar o link com amigos.",
-            "C) Proteger suas contas e procurar os canais oficiais."
+            "Verificar o endereço e consultar fontes oficiais.",
+            "Informar a senha em qualquer página.",
+            "Confiar em todas as mensagens recebidas."
         ],
-
-        correct: 2
+        correct: 0,
+        explanation: "Correto! Sempre confira os endereços e utilize canais oficiais."
     }
-
 ];
 
 let currentQuestion = 0;
@@ -67,151 +56,122 @@ let score = 0;
 let answered = false;
 
 const questionElement = document.getElementById("question");
+const questionNumber = document.getElementById("question-number");
 const answersElement = document.getElementById("answers");
-const resultElement = document.getElementById("result");
-const nextButton = document.getElementById("next-question");
-const numberElement = document.getElementById("question-number");
+const feedbackElement = document.getElementById("feedback");
+const nextButton = document.getElementById("next-button");
 const progressBar = document.getElementById("progress-bar");
+const resultElement = document.getElementById("quiz-result");
+const scoreElement = document.getElementById("score");
 
 function showQuestion() {
-
     answered = false;
 
     const question = questions[currentQuestion];
 
-    questionElement.textContent = question.question;
-
-    numberElement.textContent =
+    questionNumber.textContent =
         `Pergunta ${currentQuestion + 1} de ${questions.length}`;
 
-    progressBar.style.width =
-        `${((currentQuestion + 1) / questions.length) * 100}%`;
+    questionElement.textContent = question.question;
 
     answersElement.innerHTML = "";
+    feedbackElement.textContent = "";
 
-    resultElement.textContent = "";
+    nextButton.disabled = true;
+    nextButton.textContent =
+        currentQuestion === questions.length - 1
+            ? "Ver resultado"
+            : "Próxima pergunta";
 
-    nextButton.style.display = "none";
+    progressBar.style.width =
+        `${(currentQuestion / questions.length) * 100}%`;
 
     question.answers.forEach((answer, index) => {
-
         const button = document.createElement("button");
 
         button.textContent = answer;
+        button.className = "answer-btn";
 
         button.addEventListener("click", () => {
-            checkAnswer(index, button);
+            checkAnswer(index);
         });
 
         answersElement.appendChild(button);
-
     });
-
 }
 
-function checkAnswer(selected, selectedButton) {
-
+function checkAnswer(selectedIndex) {
     if (answered) return;
 
     answered = true;
 
-    const correct = questions[currentQuestion].correct;
-
+    const question = questions[currentQuestion];
     const buttons = answersElement.querySelectorAll("button");
 
-    buttons.forEach(button => {
+    buttons.forEach((button, index) => {
         button.disabled = true;
+
+        if (index === question.correct) {
+            button.classList.add("correct");
+        }
+
+        if (index === selectedIndex && index !== question.correct) {
+            button.classList.add("incorrect");
+        }
     });
 
-    if (selected === correct) {
-
+    if (selectedIndex === question.correct) {
         score++;
-
-        resultElement.textContent =
-            "Muito bem! Você acertou a resposta!";
-
-        resultElement.style.color = "#35e69b";
-
+        feedbackElement.textContent = "✓ " + question.explanation;
+        feedbackElement.style.color = "#4ade80";
     } else {
-
-        resultElement.textContent =
-            "Resposta incorreta. A alternativa correta é: " +
-            questions[currentQuestion].answers[correct];
-
-        resultElement.style.color = "#ff7777";
-
+        feedbackElement.textContent =
+            "✗ Resposta incorreta. " + question.explanation;
+        feedbackElement.style.color = "#f87171";
     }
 
-    selectedButton.style.borderColor =
-        selected === correct ? "#35e69b" : "#ff7777";
-
-    buttons[correct].style.borderColor = "#35e69b";
-
-    nextButton.style.display = "block";
-
-    if (currentQuestion === questions.length - 1) {
-
-        nextButton.textContent = "Ver resultado";
-
-    } else {
-
-        nextButton.textContent = "Próxima pergunta";
-
-    }
-
-}
-
-function nextQuestion() {
-
-    if (currentQuestion < questions.length - 1) {
-
-        currentQuestion++;
-
-        showQuestion();
-
-    } else {
-
-        showResult();
-
-    }
-
+    nextButton.disabled = false;
+    progressBar.style.width =
+        `${((currentQuestion + 1) / questions.length) * 100}%`;
 }
 
 function showResult() {
+    questionElement.hidden = true;
+    questionNumber.hidden = true;
+    answersElement.hidden = true;
+    feedbackElement.hidden = true;
+    nextButton.hidden = true;
 
-    questionElement.textContent = "Quiz finalizado!";
+    resultElement.hidden = false;
 
-    numberElement.textContent = "Resultado final";
-
-    answersElement.innerHTML = "";
-
-    progressBar.style.width = "100%";
-
-    resultElement.textContent =
+    scoreElement.textContent =
         `Você acertou ${score} de ${questions.length} perguntas!`;
-
-    resultElement.style.color = "#35e69b";
-
-    nextButton.style.display = "block";
-
-    nextButton.textContent = "Refazer quiz";
-
-    nextButton.onclick = restartQuiz;
-
 }
 
-function restartQuiz() {
+nextButton.addEventListener("click", () => {
+    if (!answered) return;
 
+    if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        showQuestion();
+    } else {
+        showResult();
+    }
+});
+
+document.getElementById("restart-button").addEventListener("click", () => {
     currentQuestion = 0;
-
     score = 0;
 
-    nextButton.onclick = nextQuestion;
+    questionElement.hidden = false;
+    questionNumber.hidden = false;
+    answersElement.hidden = false;
+    feedbackElement.hidden = false;
+    nextButton.hidden = false;
+
+    resultElement.hidden = true;
 
     showQuestion();
-
-}
-
-nextButton.addEventListener("click", nextQuestion);
+});
 
 showQuestion();
